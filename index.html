@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام الصياد — HUNTER SYSTEM</title>
+<meta name="theme-color" content="#05070d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== Gate ===== -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="sys-tag">⚠ SYSTEM ALERT</div>
+    <h1>نظام الصياد</h1>
+    <p>بوابة الدخول إلى فعالية الأنمي. للوصول يجب تسجيل اسم حسابك على تطبيق <b>كونايو</b>.</p>
+    <div class="warn-box">
+      ⚠ إدخال اسم حساب كونايو غير صحيح أو مكرر قد يؤدي إلى <b>استبعادك من الفعالية</b>. تأكد من كتابة الاسم تمامًا كما يظهر في التطبيق.
+    </div>
+    <input id="konayoInput" type="text" placeholder="اسم حساب كونايو" autocomplete="off" maxlength="40">
+    <button class="btn" id="startBtn">بدء الدخول ⟶</button>
+    <p class="muted" style="margin-top:.8rem;font-size:.78rem">بالمتابعة أنت توافق على عرض اسمك في سجلات المشاركين الإدارية فقط.</p>
+  </div>
+</div>
+
+<!-- ===== App ===== -->
+<header class="topbar hidden" id="topbar">
+  <div class="brand">HUNTER SYSTEM</div>
+  <div class="user">مرحبًا، <b id="userName">—</b></div>
+</header>
+
+<nav class="tabs hidden" id="tabs">
+  <button data-tab="quiz" class="active">اختبار الأنمي</button>
+  <button data-tab="faction">الفصيل</button>
+  <button data-tab="case">القضية</button>
+  <button data-tab="points">النقاط</button>
+  <button data-tab="dev">المطور</button>
+</nav>
+
+<main class="hidden" id="main">
+
+  <!-- Quiz -->
+  <section class="tab-panel" id="tab-quiz">
+    <div class="card" id="quizIntro">
+      <h2>اختبار الأنمي</h2>
+      <p>عشرون سؤالًا، لكل سؤال ثلاث اختيارات، ومهلة <b>15 ثانية</b> لكل سؤال.</p>
+      <p class="muted">عند انتهاء الوقت ينتقل الاختبار تلقائيًا. لا تُكشف صحة إجابتك أثناء الاختبار.</p>
+      <button class="btn" id="quizStartBtn">ابدأ الاختبار</button>
+    </div>
+
+    <div class="card hidden" id="quizBox">
+      <div class="quiz-head">
+        <span class="q-count" id="qCount">—</span>
+        <span class="timer" id="qTimer">15</span>
+      </div>
+      <div class="q-text" id="qText">—</div>
+      <div id="qOptions"></div>
+      <div class="progress"><div id="qProgress" style="width:0%"></div></div>
+    </div>
+
+    <div class="card hidden" id="quizResult">
+      <h2>نتيجتك</h2>
+      <div class="result-box">
+        <div class="score-big" id="scoreBig">—</div>
+        <div class="score-sub" id="scoreSub">—</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Faction -->
+  <section class="tab-panel hidden" id="tab-faction">
+    <div class="card" id="factionChoose">
+      <h2>اختيار الفصيل</h2>
+      <p>انضم إلى أحد الفصيلين، أو أعلن عدم انحيازك. اختر بحكمة — لا يمكن تغيير الاختيار.</p>
+      <div class="faction-buttons">
+        <button class="f-btn f-light" data-f="light">فصيل النور</button>
+        <button class="f-btn f-dark" data-f="dark">فصيل الظلام</button>
+      </div>
+      <button class="btn btn-ghost" id="neutralBtn">لا أرغب بالانحياز لفصيل محدد</button>
+    </div>
+
+    <div class="card" id="factionStats">
+      <h2>ميزان القوى</h2>
+      <p class="muted" id="factionCount">—</p>
+      <div class="ratio-bar">
+        <div class="ratio-light" id="ratioLight" style="width:50%"></div>
+        <div class="ratio-dark" id="ratioDark" style="width:50%"></div>
+      </div>
+      <div class="ratio-labels">
+        <span>النور <b id="pctLight">50%</b></span>
+        <span>الظلام <b id="pctDark">50%</b></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Case -->
+  <section class="tab-panel hidden" id="tab-case">
+    <div class="card">
+      <h2>القضية الجنائية — مقتل «سيف الرمال»</h2>
+      <p>فندق «أوريون» الفاخر، جناح الغرفة 704. في الساعة 11:47 مساءً عُثر على رجل الأعمال سيف الرمال مقتولًا. الباب مغلق، والنافذة مفتوحة على الشرفة.</p>
+
+      <div class="case-block">
+        <h3>📖 المشتبه بهم</h3>
+        <ul>
+          <li><b>رامي الشامي</b> — شريك تجاري، بينهما نزاع مالي حاد.</li>
+          <li><b>لينا فوّاز</b> — السكرتيرة، تعرف أسرارًا عن اختلاسات.</li>
+          <li><b>خالد بن سلمان</b> — حارس أمن، يملك بطاقة الماستر.</li>
+          <li><b>نور الرمال</b> — زوجة الضحية، بينهما خلافات مالية.</li>
+        </ul>
+      </div>
+
+      <div class="case-block">
+        <h3>👁 أقوال الشهود</h3>
+        <ul>
+          <li><b>سامي (عامل الغرف):</b> سمع صوت كسر زجاج من 704 نحو 11:30 مساءً.</li>
+          <li><b>نزيل الغرفة 703:</b> رأى رجلًا ببدلة رمادية يخرج من الشرفة، ثم يعود.</li>
+          <li><b>هدى (الاستقبال):</b> سجلت دخول رامي الساعة 11:15، لكن سجل البوابة يقول 10:40.</li>
+          <li><b>خالد (الحارس):</b> يقول إنه كان في دورة الأمن 11:00–12:00، لكن كاميرا الدرج تُظهره في 11:25.</li>
+        </ul>
+      </div>
+
+      <div class="case-block">
+        <h3>📄 مستندات وتقارير</h3>
+        <ul>
+          <li><b>الطبيب الشرعي:</b> الوفاة بضربة على الرأس بأداة ثقيلة، بين 11:20 و11:40 مساءً.</li>
+          <li><b>تقرير الباب:</b> لم يُغلق من الداخل — أُغلق ببطاقة الماستر (أثر واضح).</li>
+          <li><b>مذكرة الضحية:</b> «رامي يعرف عن الحساب السري. أخبرني أنه سيدفع الثمن.»</li>
+          <li><b>سجل المكالمات:</b> مكالمة من لينا إلى الضحية 11:10 مساءً (40 ثانية).</li>
+          <li><b>فاتورة المطعم:</b> رامي كان موجودًا 10:50–11:35، لكنها غير موقعة.</li>
+        </ul>
+      </div>
+
+      <div class="case-block alt">
+        <h3>⚖ أدلة متعارضة</h3>
+        <ul>
+          <li>بدلة رمادية في سلة الغسيل عليها دم — لكن مقاسها لا يناسب رامي (قصير القامة).</li>
+          <li>بصمة على مقبض النافذة تعود إلى خالد.</li>
+          <li>حذاء رياضي مقاس 44 في الشرفة — مقاس لينا 37.</li>
+          <li>شعر أسود طويل على وسادة الكرسي — لينا شعرها قصير.</li>
+        </ul>
+      </div>
+
+      <div class="case-block">
+        <h3>🕒 توقيتات حرجة</h3>
+        <ul>
+          <li>10:40 — دخول رامي (سجل البوابة).</li>
+          <li>11:10 — مكالمة لينا.</li>
+          <li>11:25 — كاميرا الدرج ترصد خالدًا.</li>
+          <li>11:30 — صوت كسر زجاج.</li>
+          <li>11:20–11:40 — وقت الوفاة التقديري.</li>
+          <li>11:47 — اكتشاف الجثة.</li>
+        </ul>
+      </div>
+
+      <div class="case-block">
+        <h3>🔍 تفاصيل متفرقة</h3>
+        <ul>
+          <li>كاميرا الشرفة معطلة منذ 3 أيام «بطلب من الإدارة».</li>
+          <li>الضحية كان يمسك خيطًا أحمر صغيرًا — يطابق ربطة عنق رامي أو ربطة شعر نور.</li>
+          <li>نور الرمال زارت الفندق سرًا في 11:00 مساءً بحسب سجل السيارات.</li>
+          <li>لينا كانت ترتدي بدلة رمادية ذلك اليوم بحسب صورة في هاتف زميلها.</li>
+          <li>مذكرة تحت السرير: «الغرفة 704 — تمام الساعة 11:30».</li>
+        </ul>
+      </div>
+
+      <h3>🧠 استنتاجك</h3>
+      <p class="muted">اكتب تحليلك: من القاتل؟ الدافع؟ الأداة؟ التسلسل الزمني. سيُرسل استنتاجك إلى مدير الفعالية مباشرة.</p>
+      <textarea id="caseAnswer" placeholder="اكتب استنتاجك الكامل هنا..." maxlength="5000"></textarea>
+      <button class="btn btn-cyan" id="caseSubmitBtn">إرسال الاستنتاج</button>
+      <p class="muted" id="caseStatus" style="margin-top:.6rem"></p>
+    </div>
+  </section>
+
+  <!-- Points -->
+  <section class="tab-panel hidden" id="tab-points">
+    <div class="card">
+      <h2>نقاطك</h2>
+      <div class="result-box" style="padding:.8rem 0">
+        <div class="score-big" id="myPoints" style="font-size:2.4rem">0</div>
+        <div class="score-sub">نقطة</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>سجل النقاط</h2>
+      <div id="pointsLog" class="muted">—</div>
+    </div>
+    <div class="card">
+      <h2>قواعد الاحتساب</h2>
+      <div id="rulesBox" class="muted">—</div>
+    </div>
+  </section>
+
+  <!-- Dev -->
+  <section class="tab-panel hidden" id="tab-dev">
+    <div class="card">
+      <h2>معلومات المطور</h2>
+      <p>شخصية هادئة، تُفضّل العتمة والتفاصيل الصغيرة. يبني الأشياء ليقرأها الآخرون ويهربون من الواقع قليلًا.</p>
+      <div class="dev-grid" style="margin-top:1rem">
+        <div class="dev-card"><h4>الاسم / Name</h4><p>ملل — Malal</p></div>
+        <div class="dev-card"><h4>العمر / Age</h4><p>19 عامًا — 19 years old</p></div>
+      </div>
+      <h3>الاهتمامات / Interests</h3>
+      <div class="dev-grid">
+        <div class="dev-card"><h4>💻</h4><p>البرمجة — Programming</p></div>
+        <div class="dev-card"><h4>✍️</h4><p>الكتابة — Writing</p></div>
+        <div class="dev-card"><h4>📚</h4><p>القراءة — Reading</p></div>
+        <div class="dev-card"><h4>🌙</h4><p>النوم — Sleeping</p></div>
+      </div>
+      <h3>التواصل / Contact</h3>
+      <div class="dev-grid">
+        <div class="dev-card"><h4>كونايو / Konayo</h4><p>كان ملل</p></div>
+        <div class="dev-card"><h4>تيليجرام / Telegram</h4><p>@y_x_tt</p></div>
+      </div>
+      <p class="muted" style="margin-top:1rem">📩 التواصل متاح لطلب إنشاء موقع تعريفي أو موقع لفعالية أنمي أو أي مشروع ويب مشابه.</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- FAB -->
+<button class="fab hidden" id="restBtn">☕ استراحة المحارب</button>
+
+<!-- Rest Modal -->
+<div class="modal hidden" id="restModal">
+  <div class="modal-inner">
+    <h2>استراحة المحارب</h2>
+    <p class="muted">أرسل هذا التحدي إلى الذكاء الاصطناعي الذي تستخدمه، ثم الصق رده كاملًا دون تعديل، مع الإشارة إلى المطور.</p>
+    <div class="case-block" style="border-right-color:var(--gold)">
+      <p style="font-size:.85rem">التحدي المقترح:</p>
+      <p style="color:var(--gold-hi)">«اكتب لي مقطعًا قصيرًا بأسلوب نظام Solo Leveling، واذكر أن هذا التحدي موجّه من المطور @y_x_tt»</p>
+    </div>
+    <label class="muted" style="display:block;margin:.6rem 0 .3rem">رد الذكاء الاصطناعي (كاملًا):</label>
+    <textarea id="restResponse" placeholder="الصق الرد كاملًا هنا..." maxlength="4000"></textarea>
+    <label class="muted" style="display:block;margin:.8rem 0 .3rem">هل تسمح بنشر الرد بعد مراجعته؟</label>
+    <div class="btn-row">
+      <button class="btn btn-cyan" id="restAllow">أسمح بالنشر</button>
+      <button class="btn btn-ghost" id="restDeny">لا أسمح بالنشر</button>
+    </div>
+    <button class="btn btn-ghost" style="margin-top:.6rem" id="restClose">إغلاق</button>
+    <p class="muted" id="restStatus" style="margin-top:.6rem"></p>
+  </div>
+</div>
+
+<!-- Neutral Modal -->
+<div class="modal hidden" id="neutralModal">
+  <div class="modal-inner">
+    <h2>تحذير — عدم الانحياز</h2>
+    <p>عدم الانحياز قد يعني <b>عدم حصولك على نقاط الفصيلين</b> بعد انتهاء الحرب. لكنك ستنضم لفصيل الخالدين وتحصل على نقاطه المميزة فورًا.</p>
+    <p class="muted">هل أنت متأكد؟</p>
+    <div class="btn-row" style="margin-top:1rem">
+      <button class="btn btn-ghost" id="neutralBack">العودة لاختيار فصيل</button>
+      <button class="btn btn-cyan" id="neutralConfirm">تأكيد عدم الانحياز</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+          </html>
