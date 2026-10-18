@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة الإدارة — HUNTER SYSTEM</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="admin-wrap">
+  <div class="topbar" style="border-radius:12px;margin-bottom:1rem">
+    <div class="brand">🛡 لوحة الإدارة</div>
+    <div class="user" id="adminAuthState">غير مسجل</div>
+  </div>
+
+  <div class="card" id="loginCard">
+    <h2>تسجيل الدخول</h2>
+    <p class="muted">كلمة المرور مضبوطة في متغير البيئة ADMIN_PASSWORD.</p>
+    <input id="adminPass" type="password" placeholder="كلمة المرور" style="margin-top:.6rem">
+    <button class="btn" id="adminLoginBtn">دخول</button>
+  </div>
+
+  <div id="adminPanel" class="hidden">
+    <div class="kpi-grid" id="kpis"></div>
+
+    <div class="card">
+      <h2>المشاركون</h2>
+      <div style="overflow-x:auto"><table id="tblParts"><thead><tr>
+        <th>#</th><th>الاسم</th><th>النقاط</th><th>نتيجة الاختبار</th><th>الفصيل</th><th>القضية</th><th>الاستراحة</th><th>التسجيل</th>
+      </tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="card">
+      <h2>ترتيب الاختبار</h2>
+      <div style="overflow-x:auto"><table id="tblRank"><thead><tr>
+        <th>#</th><th>الاسم</th><th>النتيجة</th><th>وقت الإكمال</th>
+      </tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="card">
+      <h2>حلول القضية الجنائية</h2>
+      <div id="casesBox" class="muted">—</div>
+    </div>
+
+    <div class="card">
+      <h2>استراحة المحارب</h2>
+      <div id="restBox" class="muted">—</div>
+    </div>
+
+    <div class="card">
+      <h2>إعدادات النقاط والفعالية</h2>
+      <div id="settingsBox" class="muted">—</div>
+    </div>
+
+    <div class="card">
+      <h2>توزيع نقاط الفصائل</h2>
+      <p class="muted">اضغط لتوزيع نقاط النور والظلام على أعضائهما وفق القيم الحالية. تُنفذ مرة واحدة فقط.</p>
+      <button class="btn btn-cyan" id="awardBtn">توزيع نقاط الفصائل</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+let adminToken = localStorage.getItem('hs_admin') || null;
+
+const api = async (path, opts = {}) => {
+  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  if (adminToken) headers['x-admin-token'] = adminToken;
+  const r = await fetch(path, { ...opts, headers });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || 'error');
+  return d;
+};
+const fmt = t => new Date(t).toLocaleString('ar-EG');
+
+async function login() {
+  const pass = $('#adminPass').value;
+  try {
+    const r = await api('/api/admin/login', { method: 'POST', body: JSON.stringify({ password: pass }) });
+    adminToken = r.token;
+    localStorage.setItem('hs_admin', adminToken);
+    await loadAll();
+  } catch (e) { alert('كلمة مرور خاطئة'); }
+}
+
+$('#adminLoginBtn').onclick = login;
+
+async function loadAll() {
+  $('#loginCard').classList.add('hidden');
+  $('#adminPanel').classList.remove('hidden');
+  $('#adminAuthState').textContent = 'مسجل ✓';
+  try {
+    const [parts, rank, fac, cases, rest, settings] = await Promise.all([
+      api('/api/admin/participants'),
+      api('/api/admin/ranking'),
+      api('/api/admin/factions'),
+      api('/api/admin/cases'),
+      api('/api/admin/rest'),
+      api('/api/admin/settings')
+    ]);
+    $('#kpis').innerHTML = `
+      <div class="kpi"><div class="n">${parts.length}</div><div class="l">مشاركون</div></div>
+      <div class="kpi"><div class="n">${rank.length}</div><div class="l">أكملوا الاختبار</div></div>
+      <div class="kpi"><div class="n">${fac.light}</div><div class="l">النور</div></div>
+      <div class="kpi"><div class="n">${fac.dark}</div><div class="l">الظلام</div></div>
+      <div class="kpi"><div class="n">${fac.immortal}</div><div class="l">الخالدون</div></div>
+      <div class="kpi"><div class="n">${cases.length}</div><div class="l">حلول القضية</div></div>
+    `;
+
+    $('#tblParts tbody').innerHTML = parts.map((p, i) => `<tr>
+      <td>${i + 1}</td><td>${p.konayo}</td><td>${p.points}</td>
+      <td>${p.quiz_score ?? '—'} / 20</td>
+      <td>${p.faction === 'light' ? 'نور' : p.faction === 'dark' ? 'ظلام' : p.faction === 'immortal' ? 'خالدون' : '—'}</td>
+      <td>${p.case_submitted ? '✓' : '—'}</td>
+      <td>${p.rest_submitted ? '✓' : '—'}</td>
+      <td>${fmt(p.created_at)}</td>
+    </tr>`).join('');
+
+    $('#tblRank tbody').innerHTML = rank.map((r, i) => `<tr>
+      <td>${i + 1}</td><td>${r.konayo}</td><td>${r.quiz_score} / 20</td>
+      <td>${r.quiz_completed_at ? fmt(r.quiz_completed_at) : '—'}</td>
+    </tr>`).join('');
+
+    $('#casesBox').innerHTML = cases.length ? cases.map(c => `
+      <div class="case-block">
+        <div style="display:flex;justify-content:space-between">
+          <b style="color:var(--gold-hi)">${c.konayo}</b>
+          <span class="muted">${fmt(c.created_at)}</span>
+        </div>
+        <p style="white-space:pre-wrap;margin-top:.5rem">${c.answer.replace(/</g,'&lt;')}</p>
+      </div>`).join('') : '<span class="muted">لا توجد حلول بعد.</span>';
+
+    $('#restBox').innerHTML = rest.length ? rest.map(r => `
+      <div class="case-block">
+        <div style="display:flex;justify-content:space-between">
+          <b style="color:var(--gold-hi)">${r.konayo}</b>
+          <span class="muted">${fmt(r.created_at)}</span>
+        </div>
+        <p style="white-space:pre-wrap;margin:.4rem 0">${r.response.replace(/</g,'&lt;')}</p>
+        <div class="btn-row">
+          <button class="btn btn-cyan" onclick="setRestStatus(${r.id}, 'approved')">موافقة</button>
+          <button class="btn btn-danger" onclick="setRestStatus(${r.id}, 'rejected')">رفض</button>
+        </div>
+        <p class="muted">الحالة: ${r.status} | النشر: ${r.allow_publish ? 'مسموح' : 'مرفوض'}</p>
+      </div>`).join('') : '<span class="muted">لا توجد ردود بعد.</span>';
+
+    const fields = [
+      ['rule_quiz_per_correct', 'نقاط كل إجابة صحيحة'],
+      ['rule_faction_light', 'نقاط فصيل النور'],
+      ['rule_faction_dark', 'نقاط فصيل الظلام'],
+      ['rule_faction_immortal', 'نقاط الخالدين'],
+      ['rule_case', 'نقاط حل القضية'],
+      ['rule_rest', 'نقاط استراحة المحارب'],
+      ['event_title', 'عنوان الفعالية'],
+      ['event_active', 'الفعالية مفتوحة (1/0)']
+    ];
+    $('#settingsBox').innerHTML = fields.map(([k, l]) => `
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem">
+        <label style="flex:1;font-size:.85rem">${l}</label>
+        <input data-k="${k}" value="${settings[k] ?? ''}" style="max-width:180px">
+      </div>`).join('') +
+      `<button class="btn btn-cyan" onclick="saveSettings()">حفظ الإعدادات</button>`;
+  } catch (e) {
+    alert('انتهت الجلسة، أعد تسجيل الدخول');
+    localStorage.removeItem('hs_admin');
+  }
+}
+
+async function setRestStatus(id, status) {
+  await api('/api/admin/rest/' + id + '/status', { method: 'POST', body: JSON.stringify({ status }) });
+  loadAll();
+}
+
+async function saveSettings() {
+  const body = {};
+  $$('#settingsBox input').forEach(i => body[i.dataset.k] = i.value);
+  await api('/api/admin/settings', { method: 'POST', body: JSON.stringify(body) });
+  alert('تم الحفظ ✓');
+}
+
+$('#awardBtn') && ($('#awardBtn').onclick = async () => {
+  if (!confirm('توزيع نقاط الفصائل الآن؟ لن تُنفذ مرة أخرى.')) return;
+  try {
+    const r = await api('/api/admin/award-factions', { method: 'POST' });
+    alert(`تم التوزيع على ${r.awarded} مشاركًا.`);
+    loadAll();
+  } catch (e) { alert(e.message); }
+});
+
+if (adminToken) loadAll().catch(() => { localStorage.removeItem('hs_admin'); });
+</script>
+</body>
+</html>
